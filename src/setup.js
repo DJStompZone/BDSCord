@@ -3,12 +3,11 @@ const { v4: uuidv4 } = require('uuid');
 const dotenv = require('dotenv');
 const path = require('path');
 
-// Load environment variables from .env file
-dotenv.config();
+const ENV_PATH = path.resolve(process.cwd(), '.env');
 
-const ENV_PATH = path.resolve(__dirname, '.env');
+dotenv.config({ path: ENV_PATH });
 
-async function generateEnvFile(config) {
+function generateEnvFile(config) {
   const envContent = `
 MINECRAFT_HOST=${config.MINECRAFT_HOST}
 MINECRAFT_PORT=${config.MINECRAFT_PORT}
@@ -18,14 +17,14 @@ DISCORD_TOKEN=${config.DISCORD_TOKEN}
 WEBSOCKET_SECRET=${config.WEBSOCKET_SECRET}
 `.trim();
 
-  fs.writeFileSync(ENV_PATH, envContent);
+  fs.writeFileSync(ENV_PATH, envContent, 'utf8');
 }
 
 async function displayConfig(config) {
   const chalk = (await import('chalk')).default;
   console.log('\nReview your configuration:');
   for (const [key, value] of Object.entries(config)) {
-    if (value && value?.length > 0) {
+    if (value && value.length > 0) {
       console.log(`${chalk.green(key)}: ${value}`);
     } else {
       console.log(`${chalk.red(key)}: Not set`);
@@ -39,7 +38,7 @@ async function getConfig() {
   const generatedSecret = uuidv4();
   
   // Load current .env values if they exist
-  const currentConfig = dotenv.config().parsed || {};
+  const currentConfig = dotenv.config({ path: ENV_PATH }).parsed || {};
 
   const questions = [
     {
@@ -86,17 +85,17 @@ async function getConfig() {
 
 async function main() {
   const inquirer = (await import('inquirer')).default;
-
+  const chalk = (await import('chalk')).default;
   if (fs.existsSync(ENV_PATH)) {
     const { action } = await inquirer.prompt([
       {
         type: 'list',
         name: 'action',
-        message: '.env file already exists. What would you like to do?',
+        message: '.env file already exists. What would you like to do?\n',
         choices: [
-          { name: 'Start over and create a new configuration', value: 'startOver' },
-          { name: 'Update missing/blank values in the existing configuration', value: 'update' },
-          { name: 'Exit', value: 'exit' }
+          { name: `Start over and create a ${chalk.green("new config")} file`, value: 'startOver' },
+          { name: `Update missing/blank values in the ${chalk.yellow("existing config")} file`, value: 'update' },
+          { name: `${chalk.red("Exit")}`, value: 'exit' }
         ]
       }
     ]);
@@ -108,6 +107,8 @@ async function main() {
 
     if (action === 'startOver') {
       fs.unlinkSync(ENV_PATH);
+    } else {
+      dotenv.config({ path: ENV_PATH });
     }
   }
 
@@ -115,7 +116,7 @@ async function main() {
   await generateEnvFile(config);
   await displayConfig(config);
 
-  console.log('\nConfiguration saved to .env file.');
+  console.log(`\n${chalk.green("Success.")} ${chalk.yellow("Configuration saved in")} ${chalk.magenta(".env")}`);
 }
 
 main();
