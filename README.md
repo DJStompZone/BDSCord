@@ -1,6 +1,14 @@
-# BDSCord
+<h1 align="center">BDSCord</h1>
 
-BDSCord is a tool for integrating Minecraft Bedrock server chat with a Python component via WebSockets, using `bedrock-protocol` for Minecraft and `websocket-client` for Python.
+<p align="center">
+    <img src="https://github.com/DJStompZone/BDSCord/assets/85457381/70236296-a113-4bf4-80b4-9221e8c59195" width="50%">
+</p>
+
+<div width="50%">
+<p align="center">
+<code>BDSCord</code> is a tool for integrating your Minecraft Bedrock server with Python plugins via WebSockets.
+</p>
+</div>
 
 ## Setup
 
